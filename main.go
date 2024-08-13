@@ -55,12 +55,21 @@ func (h *plugin) NewHttpContext(_ uint32) types.HttpContext {
 
 type tester struct {
 	types.DefaultHttpContext
-	size int
+	size        int
+	requestBody []byte
 }
 
 func (c *tester) OnHttpRequestHeaders(numHeaders int, endOfStream bool) types.Action {
 	b := make([]byte, c.size)
-	proxywasm.LogInfof("alloc success, point address: %p", b)
-	proxywasm.SendHttpResponse(200, nil, nil, -1)
+	proxywasm.SendHttpResponse(200, nil, b, -1)
+	return types.ActionPause
+}
+
+func (c *tester) OnHttpRequestBody(bodySize int, endOfStream bool) types.Action {
+	if bodySize > 0 {
+		body, _ := proxywasm.GetHttpRequestBody(0, bodySize)
+		c.requestBody = append(c.requestBody, body...)
+	}
+
 	return types.ActionContinue
 }

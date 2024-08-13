@@ -11,4 +11,8 @@ services:
       - ./plugin.wasm:/plugin.wasm
     ports:
       - 8080:8080
-      - 9901:9901
+      - 15000:15000
+    deploy:
+      resources:
+        limits:
+          memory: 10G
